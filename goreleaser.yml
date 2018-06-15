@@ -3,11 +3,16 @@ build:
   # Path to main.go file.
   # Default is `main.go`
   main: ./server.go
+  binary: n2proxy
+
+  env:
+    - CGO_ENABLED=0
 
   # GOOS list to build in.
   # For more info refer to https://golang.org/doc/install/source#environment
   # Defaults are darwin and linux
   goos:
+    - linux
     - darwin
 
   # GOARCH to build in.
