@@ -2,7 +2,6 @@ package rweng
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -37,7 +36,7 @@ func (e *Eng) ProcessRequest(w http.ResponseWriter, r *http.Request) {
 	for _, rgx := range e.urlBan {
 		buri := bytes.ToLower([]byte(r.RequestURI))
 		if rgx.Match(buri) {
-			e.logger.Info(fmt.Sprintf("URL contraband found [%s] in:\n%s\n", rgx, buri))
+			e.logger.Warn("URL contraband found.", zap.String("Regexp", rgx.String()), zap.ByteString("PostBody", buri))
 			r.URL.Path = "/"
 			r.URL.RawQuery = ""
 			break
@@ -47,7 +46,7 @@ func (e *Eng) ProcessRequest(w http.ResponseWriter, r *http.Request) {
 	// search for posted contraband
 	for _, rgx := range e.postBan {
 		if rgx.Match(bytes.ToLower(b)) {
-			e.logger.Info(fmt.Sprintf("Posted contraband found [%s] in:\n%s\n", rgx, b))
+			e.logger.Warn("Posted contraband found.", zap.String("Regexp", rgx.String()), zap.ByteString("PostBody", b))
 			b = []byte{}
 			break
 		}

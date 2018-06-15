@@ -97,7 +97,7 @@ func main() {
 	zapCfg := zap.NewProductionConfig()
 	zapCfg.DisableCaller = true
 	zapCfg.DisableStacktrace = true
-	zapCfg.OutputPaths = []string{"stdout", "test.log"}
+	zapCfg.OutputPaths = []string{"stdout"}
 
 	logger, err := zapCfg.Build()
 	if err != nil {
