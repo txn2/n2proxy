@@ -1,0 +1,12 @@
+postBan:
+  [
+    'heyyou',
+    '3cscript',
+    '2fscript',
+    '<script',
+    '\(+.select'
+  ]
+urlBan:
+  [
+    'fun',
+  ]

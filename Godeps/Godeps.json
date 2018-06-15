@@ -1,0 +1,52 @@
+{
+	"ImportPath": "github.com/txn2/n2proxy",
+	"GoVersion": "go1.10",
+	"GodepVersion": "v80",
+	"Deps": [
+		{
+			"ImportPath": "github.com/go-yaml/yaml",
+			"Comment": "v2.2.1",
+			"Rev": "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+		},
+		{
+			"ImportPath": "go.uber.org/atomic",
+			"Comment": "v1.3.2",
+			"Rev": "1ea20fb1cbb1cc08cbd0d913a96dead89aa18289"
+		},
+		{
+			"ImportPath": "go.uber.org/multierr",
+			"Comment": "v1.1.0-2-gddea229",
+			"Rev": "ddea229ff1dff9e6fe8a6c0344ac73b09e81fce5"
+		},
+		{
+			"ImportPath": "go.uber.org/zap",
+			"Comment": "v1.8.0-2-g2dc8d10",
+			"Rev": "2dc8d10634f473f4dc678e48391a9dc8cf6ae6f9"
+		},
+		{
+			"ImportPath": "go.uber.org/zap/buffer",
+			"Comment": "v1.8.0-2-g2dc8d10",
+			"Rev": "2dc8d10634f473f4dc678e48391a9dc8cf6ae6f9"
+		},
+		{
+			"ImportPath": "go.uber.org/zap/internal/bufferpool",
+			"Comment": "v1.8.0-2-g2dc8d10",
+			"Rev": "2dc8d10634f473f4dc678e48391a9dc8cf6ae6f9"
+		},
+		{
+			"ImportPath": "go.uber.org/zap/internal/color",
+			"Comment": "v1.8.0-2-g2dc8d10",
+			"Rev": "2dc8d10634f473f4dc678e48391a9dc8cf6ae6f9"
+		},
+		{
+			"ImportPath": "go.uber.org/zap/internal/exit",
+			"Comment": "v1.8.0-2-g2dc8d10",
+			"Rev": "2dc8d10634f473f4dc678e48391a9dc8cf6ae6f9"
+		},
+		{
+			"ImportPath": "go.uber.org/zap/zapcore",
+			"Comment": "v1.8.0-2-g2dc8d10",
+			"Rev": "2dc8d10634f473f4dc678e48391a9dc8cf6ae6f9"
+		}
+	]
+}
