@@ -15,13 +15,13 @@ build:
     - linux
     - darwin
     - arm
-    - arm64
 
   # GOARCH to build in.
   # For more info refer to https://golang.org/doc/install/source#environment
   # Defaults are 386 and amd64
   goarch:
     - amd64
+    - arm
 
   ldflags: -s -w -X main.Version={{.Version}}
 
@@ -97,3 +97,24 @@ snapcraft:
     detect and block hacking attempts.
   grade: stable
   confinement: classic
+
+dockers:
+  -
+    goos: linux
+    goarch: amd64
+    goarm: ''
+    binary: n2proxy
+    image: txn2/n2proxy
+    dockerfile: dockerfiles/amd64/Dockerfile
+    tag_templates:
+    - "{{ .Version }}"
+    - latest
+  -
+    goos: linux
+    goarch: arm
+    goarm: 6
+    binary: n2proxy
+    image: txn2/n2proxy
+    dockerfile: dockerfiles/arm/Dockerfile
+    tag_templates:
+    - "armhf-{{ .Version }}"
