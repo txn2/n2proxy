@@ -4,7 +4,9 @@ postBan:
     '3cscript',
     '2fscript',
     '<script',
-    '\(+.select'
+    '\(+.select',
+    '\+\(',
+    '\+\s+\(',
   ]
 urlBan:
   [
