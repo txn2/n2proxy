@@ -21,7 +21,7 @@ build:
   goarch:
     - amd64
 
-  ldflags: -s -w -X main.build={{.Version}} -X github.com/txn2/dmk/cli.Version={{.Version}}
+  ldflags: -s -w -X main.Version={{.Version}}
 
 # Archive customization
 archive:

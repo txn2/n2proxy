@@ -8,11 +8,15 @@ import (
 
 	"time"
 
+	"fmt"
+
+	"flag"
+
 	"github.com/txn2/n2proxy/rweng"
 	"go.uber.org/zap"
 )
 
-const VERSION = "v1.1"
+var Version = "0.0.0"
 
 // Proxy defines the proxy handler see NewProx()
 type Proxy struct {
@@ -50,7 +54,6 @@ func NewProxy(target string, cfgFile string, logger *zap.Logger) *Proxy {
 // handle requests
 func (p *Proxy) handle(w http.ResponseWriter, r *http.Request) {
 
-	r.Header["n2proxy"] = []string{VERSION}
 	start := time.Now()
 	reqPath := r.URL.Path
 	reqMethod := r.Method
@@ -75,29 +78,44 @@ func (p *Proxy) handle(w http.ResponseWriter, r *http.Request) {
 
 // main function
 func main() {
-	port := getEnv("PORT", "9090")
-	debug := getEnv("DEBUG", "false")
-	cfg := getEnv("CFG", "")
-	backend := getEnv("BACKEND", "http://example.com:80")
+	portEnv := getEnv("PORT", "9090")
+	cfgEnv := getEnv("CFG", "./cfg.yml")
+	backendEnv := getEnv("BACKEND", "http://example.com:80")
 
-	logger, err := zap.NewProduction()
+	// command line falls back to env
+	port := flag.String("port", portEnv, "port to listen on.")
+	cfg := flag.String("cfg", cfgEnv, "config file path.")
+	backend := flag.String("backend", backendEnv, "backend server.")
+	version := flag.Bool("version", false, "Display version.")
+	flag.Parse()
+
+	if *version {
+		fmt.Printf("Version: %s\n", Version)
+		return
+	}
+
+	zapCfg := zap.NewProductionConfig()
+	zapCfg.DisableCaller = true
+	zapCfg.DisableStacktrace = true
+	zapCfg.OutputPaths = []string{"stdout", "test.log"}
+
+	logger, err := zapCfg.Build()
 	if err != nil {
-		panic(err.Error())
+		fmt.Printf("Can not build logger: %s\n", err.Error())
+		return
 	}
 
-	if debug == "true" {
-		logger, _ = zap.NewDevelopment()
-	}
+	logger.Sync()
 
-	logger.Info("Starting reverse proxy on port: " + port)
-	logger.Info("Requests proxied to Backend: " + backend)
+	logger.Info("Starting reverse proxy on port: " + *port)
+	logger.Info("Requests proxied to Backend: " + *backend)
 
 	// proxy
-	proxy := NewProxy(backend, cfg, logger)
+	proxy := NewProxy(*backend, *cfg, logger)
 
 	// server
 	http.HandleFunc("/", proxy.handle)
-	http.ListenAndServe(":"+port, nil)
+	http.ListenAndServe(":"+*port, nil)
 }
 
 // getEnv gets an environment variable or sets a default if
