@@ -14,6 +14,8 @@ build:
   goos:
     - linux
     - darwin
+    - arm
+    - arm64
 
   # GOARCH to build in.
   # For more info refer to https://golang.org/doc/install/source#environment
@@ -86,3 +88,12 @@ brew:
 
   test: |-
     n2proxy --version
+
+snapcraft:
+  name_template: '{{ .ProjectName }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+  summary: Contraband filtering reverse proxy.
+  description: |
+    Contraband filtering reverse proxy. Provide a list of Regular Expression used to
+    detect and block hacking attempts.
+  grade: stable
+  confinement: classic

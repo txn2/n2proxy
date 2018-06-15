@@ -83,12 +83,22 @@ func main() {
 	cfgEnv := getEnv("CFG", "./cfg.yml")
 	backendEnv := getEnv("BACKEND", "http://example.com:80")
 	logoutEnv := getEnv("LOGOUT", "stdout")
+	tlsEnvBool := false
+	tlsEnv := getEnv("TLS", "false")
+	if tlsEnv == "true" {
+		tlsEnvBool = true
+	}
+	crtEnv := getEnv("CRT", "./example.crt")
+	keyEnv := getEnv("KEY", "./example.key")
 
 	// command line falls back to env
 	port := flag.String("port", portEnv, "port to listen on.")
 	cfg := flag.String("cfg", cfgEnv, "config file path.")
 	backend := flag.String("backend", backendEnv, "backend server.")
 	logout := flag.String("logout", logoutEnv, "log output stdout | ")
+	tls := flag.Bool("tls", tlsEnvBool, "TLS Support (requires crt and key)")
+	crt := flag.String("crt", crtEnv, "Path to cert. (enable --tls)")
+	key := flag.String("key", keyEnv, "Path to private key. (enable --tls")
 	version := flag.Bool("version", false, "Display version.")
 	flag.Parse()
 
@@ -118,7 +128,20 @@ func main() {
 
 	// server
 	http.HandleFunc("/", proxy.handle)
-	http.ListenAndServe(":"+*port, nil)
+
+	if *tls != true {
+		err = http.ListenAndServe(":"+*port, nil)
+		if err != nil {
+			fmt.Printf("Error starting proxy: %s\n", err.Error())
+		}
+		os.Exit(0)
+	}
+
+	logger.Info("Starting proxy in TLS mode.")
+	err = http.ListenAndServeTLS(":"+*port, *crt, *key, nil)
+	if err != nil {
+		fmt.Printf("Error starting proxyin TLS mode: %s\n", err.Error())
+	}
 }
 
 // getEnv gets an environment variable or sets a default if
