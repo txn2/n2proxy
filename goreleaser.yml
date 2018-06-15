@@ -70,3 +70,6 @@ brew:
   homepage: https://github.com/txn2/n2proxy
 
   description: "Contraband filtering reverse proxy."
+
+  test: |-
+    n2proxy --version
