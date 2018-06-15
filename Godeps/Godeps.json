@@ -20,33 +20,33 @@
 		},
 		{
 			"ImportPath": "go.uber.org/zap",
-			"Comment": "v1.8.0-2-g2dc8d10",
-			"Rev": "2dc8d10634f473f4dc678e48391a9dc8cf6ae6f9"
+			"Comment": "v1.8.0-5-g88c71ae",
+			"Rev": "88c71ae3d702167d7f8be42c0e0b68bfa4d1707e"
 		},
 		{
 			"ImportPath": "go.uber.org/zap/buffer",
-			"Comment": "v1.8.0-2-g2dc8d10",
-			"Rev": "2dc8d10634f473f4dc678e48391a9dc8cf6ae6f9"
+			"Comment": "v1.8.0-5-g88c71ae",
+			"Rev": "88c71ae3d702167d7f8be42c0e0b68bfa4d1707e"
 		},
 		{
 			"ImportPath": "go.uber.org/zap/internal/bufferpool",
-			"Comment": "v1.8.0-2-g2dc8d10",
-			"Rev": "2dc8d10634f473f4dc678e48391a9dc8cf6ae6f9"
+			"Comment": "v1.8.0-5-g88c71ae",
+			"Rev": "88c71ae3d702167d7f8be42c0e0b68bfa4d1707e"
 		},
 		{
 			"ImportPath": "go.uber.org/zap/internal/color",
-			"Comment": "v1.8.0-2-g2dc8d10",
-			"Rev": "2dc8d10634f473f4dc678e48391a9dc8cf6ae6f9"
+			"Comment": "v1.8.0-5-g88c71ae",
+			"Rev": "88c71ae3d702167d7f8be42c0e0b68bfa4d1707e"
 		},
 		{
 			"ImportPath": "go.uber.org/zap/internal/exit",
-			"Comment": "v1.8.0-2-g2dc8d10",
-			"Rev": "2dc8d10634f473f4dc678e48391a9dc8cf6ae6f9"
+			"Comment": "v1.8.0-5-g88c71ae",
+			"Rev": "88c71ae3d702167d7f8be42c0e0b68bfa4d1707e"
 		},
 		{
 			"ImportPath": "go.uber.org/zap/zapcore",
-			"Comment": "v1.8.0-2-g2dc8d10",
-			"Rev": "2dc8d10634f473f4dc678e48391a9dc8cf6ae6f9"
+			"Comment": "v1.8.0-5-g88c71ae",
+			"Rev": "88c71ae3d702167d7f8be42c0e0b68bfa4d1707e"
 		}
 	]
 }

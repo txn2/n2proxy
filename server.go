@@ -36,7 +36,8 @@ func NewProxy(target string, cfgFile string, logger *zap.Logger) *Proxy {
 	// if cfgFile exists pass proxy
 	eng, err := rweng.NewEngFromYml(cfgFile, logger)
 	if err != nil {
-		panic("Engine failure: " + err.Error())
+		fmt.Printf("Engine failure: %s\n", err.Error())
+		os.Exit(1)
 	}
 
 	pxy := httputil.NewSingleHostReverseProxy(targetUrl)
@@ -81,23 +82,25 @@ func main() {
 	portEnv := getEnv("PORT", "9090")
 	cfgEnv := getEnv("CFG", "./cfg.yml")
 	backendEnv := getEnv("BACKEND", "http://example.com:80")
+	logoutEnv := getEnv("LOGOUT", "stdout")
 
 	// command line falls back to env
 	port := flag.String("port", portEnv, "port to listen on.")
 	cfg := flag.String("cfg", cfgEnv, "config file path.")
 	backend := flag.String("backend", backendEnv, "backend server.")
+	logout := flag.String("logout", logoutEnv, "log output stdout | ")
 	version := flag.Bool("version", false, "Display version.")
 	flag.Parse()
 
 	if *version {
 		fmt.Printf("Version: %s\n", Version)
-		return
+		os.Exit(1)
 	}
 
 	zapCfg := zap.NewProductionConfig()
 	zapCfg.DisableCaller = true
 	zapCfg.DisableStacktrace = true
-	zapCfg.OutputPaths = []string{"stdout"}
+	zapCfg.OutputPaths = []string{*logout}
 
 	logger, err := zapCfg.Build()
 	if err != nil {
