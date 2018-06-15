@@ -76,7 +76,7 @@ func (p *Proxy) handle(w http.ResponseWriter, r *http.Request) {
 // main function
 func main() {
 	port := getEnv("PORT", "9090")
-	debug := getEnv("DEBUG", "true")
+	debug := getEnv("DEBUG", "false")
 	cfg := getEnv("CFG", "")
 	backend := getEnv("BACKEND", "http://example.com:80")
 

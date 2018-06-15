@@ -1,0 +1,67 @@
+# Build customization
+build:
+  # Path to main.go file.
+  # Default is `main.go`
+  main: ./server.go
+
+  # GOOS list to build in.
+  # For more info refer to https://golang.org/doc/install/source#environment
+  # Defaults are darwin and linux
+  goos:
+    - darwin
+
+  # GOARCH to build in.
+  # For more info refer to https://golang.org/doc/install/source#environment
+  # Defaults are 386 and amd64
+  goarch:
+    - amd64
+
+  ldflags: -s -w -X main.build={{.Version}} -X github.com/txn2/dmk/cli.Version={{.Version}}
+
+# Archive customization
+archive:
+  # You can change the name of the archive.
+  # This is parsed with Golang template engine and the following variables.
+  name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
+
+  # Archive format. Valid options are `tar.gz` and `zip`.
+  # Default is `zip`
+  format: tar.gz
+
+  # Replacements for GOOS and GOARCH on the archive name.
+  # The keys should be valid GOOS or GOARCH values followed by your custom
+  # replacements.
+  # By default, `replacements` replace GOOS and GOARCH values with valid outputs
+  # of `uname -s` and `uname -m` respectively.
+  replacements:
+    amd64: amd64
+    386: 386
+    darwin: macOS
+    linux: linux
+
+  format_overrides:
+    - goos: windows
+      format: zip
+
+  # Additional files you want to add to the archive.
+  # Defaults are any files matching `LICENCE*`, `LICENSE*`,
+  # `README*` and `CHANGELOG*` (case-insensitive)
+  files:
+    - LICENSE
+
+brew:
+  name: n2proxy
+
+  github:
+    owner: txn2
+    name: homebrew-tap
+
+  commit_author:
+    name: Craig Johnston
+    email: cjimti@gmail.com
+
+  folder: Formula
+
+  homepage: https://github.com/txn2/n2proxy
+
+  description: "Contraband filtering reverse proxy."
