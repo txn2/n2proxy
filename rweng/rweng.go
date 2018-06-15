@@ -33,8 +33,6 @@ func (e *Eng) ProcessRequest(w http.ResponseWriter, r *http.Request) {
 	b, _ := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 
-	b = bytes.Replace(b, []byte("fun"), []byte("euQQ3i8J"), -1)
-
 	// search for qstring contraband
 	for _, rgx := range e.urlBan {
 		buri := bytes.ToLower([]byte(r.RequestURI))
