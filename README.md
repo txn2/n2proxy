@@ -9,6 +9,9 @@ wget https://raw.githubusercontent.com/txn2/n2proxy/master/cfg.yml
 
 # install on mac
 brew install txn2/tap/n2proxy
+
+# upgrade
+brew upgrade n2proxy
 ```
 
 **Use**
