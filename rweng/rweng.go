@@ -9,9 +9,11 @@ import (
 	"strings"
 	"text/template"
 
+	"os"
+
 	"github.com/Masterminds/sprig"
-	"github.com/go-yaml/yaml"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v2"
 )
 
 type FilterCfg struct {
@@ -115,21 +117,34 @@ func NewEngFromYml(filename string, logger *zap.Logger) (*Eng, error) {
 	postBan := make([]*regexp.Regexp, 0)
 
 	for _, r := range engCfg.PostBan {
-		rxp := regexp.MustCompile(strings.ToLower(r))
+		rxp, err := regexp.Compile(strings.ToLower(r))
+		if err != nil {
+			logger.Error("Error in regex compile: " + err.Error())
+			os.Exit(1)
+		}
 		postBan = append(postBan, rxp)
 	}
 
 	urlBan := make([]*regexp.Regexp, 0)
 
 	for _, r := range engCfg.UrlBan {
-		rxp := regexp.MustCompile(strings.ToLower(r))
+		rxp, err := regexp.Compile(strings.ToLower(r))
+		if err != nil {
+			logger.Error("Error in regex compile: " + err.Error())
+			os.Exit(1)
+		}
 		urlBan = append(urlBan, rxp)
 	}
 
 	filter := make(map[*regexp.Regexp]FilterTemplate, 0)
 
 	for _, filterCfg := range engCfg.Filter {
-		rxp := regexp.MustCompile(strings.ToLower(filterCfg.Match))
+		rxp, err := regexp.Compile(strings.ToLower(filterCfg.Match))
+		if err != nil {
+			logger.Error("Error in regex compile: " + err.Error())
+			os.Exit(1)
+		}
+
 		tmpl, err := template.New(filterCfg.Name).Funcs(sprig.TxtFuncMap()).Parse(filterCfg.Template)
 		if err != nil {
 			logger.Error("Template parsing error: " + err.Error())

@@ -1,16 +1,13 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
-
 	"time"
-
-	"fmt"
-
-	"flag"
 
 	"github.com/txn2/n2proxy/rweng"
 	"go.uber.org/zap"
