@@ -28,7 +28,11 @@ type Proxy struct {
 
 // NewProxy instances a new proxy server
 func NewProxy(target string, cfgFile string, logger *zap.Logger) *Proxy {
-	targetUrl, _ := url.Parse(target)
+	targetUrl, err := url.Parse(target)
+	if err != nil {
+		fmt.Printf("Unable to parse URL: %s\n", err.Error())
+		os.Exit(1)
+	}
 
 	// if cfgFile exists pass proxy
 	eng, err := rweng.NewEngFromYml(cfgFile, logger)
