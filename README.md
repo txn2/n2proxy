@@ -28,6 +28,12 @@ CFG=./cfg.yml PORT=9090 BACKEND=http://example.com:80 n2proxy
 # command line options override environment variables
 n2proxy --port=9091 --backend=http://example.com:80
 
+
+# docker
+docker run --rm -t -v "$(pwd)":/cfg/ -p 9092:9092 \
+    txn2/n2proxy --port=9092 --cfg=/cfg/cfg.yml \
+    --backend=http://example.com
+
 ```
 
 Browse to http://localhost:9090
