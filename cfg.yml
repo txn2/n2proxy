@@ -12,3 +12,14 @@ urlBan:
   [
     'fun',
   ]
+postFilter:
+  -
+    name: taco
+    description: "Match taco."
+    match: 'taco'
+    template: '{{ .Match | shuffle }}'
+  -
+    name: space
+    description: "Match good times."
+    match: 'good.+times'
+    template: '{{ .Match | upper | nospace }}'
