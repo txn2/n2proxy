@@ -23,7 +23,7 @@ postFilter:
     match: 'taco'
     template: '{{ .Match | shuffle }}'
   -
-    name: space
+    name: goodtimes
     description: "Match good times."
     match: 'good.+times'
     template: '{{ .Match | upper | nospace }}'
