@@ -139,7 +139,7 @@ func main() {
 	logger.Info("Requests proxied to Backend: " + *backend)
 
 	// proxy
-	proxy := NewProxy(*backend, skpver, *cfg, logger)
+	proxy := NewProxy(*backend, *skpver, *cfg, logger)
 
 	// server
 	http.HandleFunc("/", proxy.handle)
