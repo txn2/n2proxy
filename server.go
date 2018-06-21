@@ -9,6 +9,8 @@ import (
 	"os"
 	"time"
 
+	"crypto/tls"
+
 	"github.com/txn2/n2proxy/rweng"
 	"go.uber.org/zap"
 )
@@ -27,7 +29,7 @@ type Proxy struct {
 //var _ http.RoundTripper = &transport{}
 
 // NewProxy instances a new proxy server
-func NewProxy(target string, cfgFile string, logger *zap.Logger) *Proxy {
+func NewProxy(target string, skpver bool, cfgFile string, logger *zap.Logger) *Proxy {
 	targetUrl, err := url.Parse(target)
 	if err != nil {
 		fmt.Printf("Unable to parse URL: %s\n", err.Error())
@@ -42,6 +44,12 @@ func NewProxy(target string, cfgFile string, logger *zap.Logger) *Proxy {
 	}
 
 	pxy := httputil.NewSingleHostReverseProxy(targetUrl)
+
+	if skpver {
+		pxy.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // client uses self-signed cert
+		}
+	}
 
 	proxy := &Proxy{
 		target: targetUrl,
@@ -89,6 +97,11 @@ func main() {
 	if tlsEnv == "true" {
 		tlsEnvBool = true
 	}
+	skpverEnvBool := false
+	skpverEnv := getEnv("SKIP_VERIFY", "false")
+	if skpverEnv == "true" {
+		skpverEnvBool = true
+	}
 	crtEnv := getEnv("CRT", "./example.crt")
 	keyEnv := getEnv("KEY", "./example.key")
 
@@ -97,9 +110,10 @@ func main() {
 	cfg := flag.String("cfg", cfgEnv, "config file path.")
 	backend := flag.String("backend", backendEnv, "backend server.")
 	logout := flag.String("logout", logoutEnv, "log output stdout | ")
-	tls := flag.Bool("tls", tlsEnvBool, "TLS Support (requires crt and key)")
+	srvtls := flag.Bool("tls", tlsEnvBool, "TLS Support (requires crt and key)")
 	crt := flag.String("crt", crtEnv, "Path to cert. (enable --tls)")
 	key := flag.String("key", keyEnv, "Path to private key. (enable --tls")
+	skpver := flag.Bool("skip-verify", skpverEnvBool, "Skip backend tls verify.")
 	version := flag.Bool("version", false, "Display version.")
 	flag.Parse()
 
@@ -125,12 +139,12 @@ func main() {
 	logger.Info("Requests proxied to Backend: " + *backend)
 
 	// proxy
-	proxy := NewProxy(*backend, *cfg, logger)
+	proxy := NewProxy(*backend, skpver, *cfg, logger)
 
 	// server
 	http.HandleFunc("/", proxy.handle)
 
-	if *tls != true {
+	if *srvtls != true {
 		err = http.ListenAndServe(":"+*port, nil)
 		if err != nil {
 			fmt.Printf("Error starting proxy: %s\n", err.Error())
