@@ -30,18 +30,20 @@ type FilterTemplate struct {
 
 // EngCfg defines an engine configuration
 type EngCfg struct {
-	PostBan []string    `yaml:"postBan"`
-	UrlBan  []string    `yaml:"urlBan"`
-	Filter  []FilterCfg `yaml:"postFilter"`
+	PostBan  []string    `yaml:"postBan"`
+	UrlBan   []string    `yaml:"urlBan"`
+	QueryBan []string    `yaml:"queryBan"`
+	Filter   []FilterCfg `yaml:"postFilter"`
 }
 
 // Eng http.Request rule engine.
 type Eng struct {
-	cfg     EngCfg
-	postBan []*regexp.Regexp
-	urlBan  []*regexp.Regexp
-	filter  map[*regexp.Regexp]FilterTemplate
-	logger  *zap.Logger
+	cfg      EngCfg
+	postBan  []*regexp.Regexp
+	urlBan   []*regexp.Regexp
+	queryBan []*regexp.Regexp
+	filter   map[*regexp.Regexp]FilterTemplate
+	logger   *zap.Logger
 }
 
 // ProcessRequest performs any rules on matching requests
@@ -71,16 +73,31 @@ func (e *Eng) ProcessRequest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// search for qstring contraband
+	// search for url path contraband
 	for _, rgx := range e.urlBan {
 		buri := bytes.ToLower([]byte(r.RequestURI))
 		if rgx.Match(buri) {
-			e.logger.Warn("URL contraband found.", zap.String("Regexp", rgx.String()), zap.ByteString("PostBody", buri))
+			e.logger.Warn("URL contraband found.", zap.String("Regexp", rgx.String()), zap.ByteString("URI", buri))
 			r.URL.Path = "/"
 			r.URL.RawQuery = ""
 			break
 		}
 	}
+
+	if len(r.URL.RawQuery) > 0 {
+		// search for url path contraband
+		for _, rgx := range e.queryBan {
+			bq := bytes.ToLower([]byte(r.URL.RawQuery))
+			if rgx.Match(bq) {
+				e.logger.Warn("QUERY STRING contraband found.", zap.String("Regexp", rgx.String()), zap.ByteString("QUERY", bq))
+				r.URL.Path = "/"
+				r.URL.RawQuery = ""
+				break
+			}
+		}
+	}
+
+	// /approval/email_video.html?clip_id=1&subject=jrigt%22%3e%3cimg%20src%3da%20onerror%3dalert(1)%3ed4xd6
 
 	// search for posted contraband
 	for _, rgx := range e.postBan {
@@ -117,7 +134,7 @@ func NewEngFromYml(filename string, logger *zap.Logger) (*Eng, error) {
 	postBan := make([]*regexp.Regexp, 0)
 
 	for _, r := range engCfg.PostBan {
-		rxp, err := regexp.Compile(strings.ToLower(r))
+		rxp, err := regexp.Compile("(?i)" + strings.ToLower(r))
 		if err != nil {
 			logger.Error("Error in regex compile: " + err.Error())
 			os.Exit(1)
@@ -128,12 +145,23 @@ func NewEngFromYml(filename string, logger *zap.Logger) (*Eng, error) {
 	urlBan := make([]*regexp.Regexp, 0)
 
 	for _, r := range engCfg.UrlBan {
-		rxp, err := regexp.Compile(strings.ToLower(r))
+		rxp, err := regexp.Compile("(?i)" + strings.ToLower(r))
 		if err != nil {
 			logger.Error("Error in regex compile: " + err.Error())
 			os.Exit(1)
 		}
 		urlBan = append(urlBan, rxp)
+	}
+
+	queryBan := make([]*regexp.Regexp, 0)
+
+	for _, r := range engCfg.QueryBan {
+		rxp, err := regexp.Compile("(?i)" + strings.ToLower(r))
+		if err != nil {
+			logger.Error("Error in regex compile: " + err.Error())
+			os.Exit(1)
+		}
+		urlBan = append(queryBan, rxp)
 	}
 
 	filter := make(map[*regexp.Regexp]FilterTemplate, 0)

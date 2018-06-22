@@ -16,6 +16,11 @@ urlBan:
   - ((\%27)|(\'))union
   - exec(\s|\+)+(s|x)p\w+
   - ((\%3C)|<)((\%2F)|\/)*[a-z0-9\%]+((\%3E)|>)
+queryBan:
+  - onerror
+  - \%22.*-\w
+  - \%22\%3e\%3c
+
 postFilter:
   -
     name: taco
