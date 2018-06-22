@@ -10,25 +10,55 @@ postBan:
   - \(.+select
   - \+\(
   - \+\s+\(
+  - \%3C\%73\%63\%72\%69\%70\%74
+  - \%C0\%BC
+  - \%E0\%80\%BC
+
 urlBan:
   - \w*((\%27)|(\'))((\%6F)|o|(\%4F))((\%72)|r|(\%52))
   - ((\%3D)|(=))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))
   - ((\%27)|(\'))union
   - exec(\s|\+)+(s|x)p\w+
   - ((\%3C)|<)((\%2F)|\/)*[a-z0-9\%]+((\%3E)|>)
+  - \%3C\%73\%63\%72\%69\%70\%74
+  - ((\%3C)|<)[^\n]+((\%3E)|>)
+  - onload
+  - autofocus
+  - refresh
 queryBan:
+  - ((\%3C)|<)((\%69)|i|(\%49))((\%6D)|m|(\%4D))((\%67)|g|(\%47))[^\n]+((\%3E)|>)
+  - 'javascript\:'
+  - img(\%20)+src
+  - img(\%20)+dynsrc
+  - img(\%20)+lowsrc
+  - javascript\%3a
+  - onload
   - onerror
+  - onclick
   - \%22.*-\w
   - \%22\%3e\%3c
+  - \)(%20|)+%3e
+  - \%5c%\22\%3b
+  - \%3C\%73\%63\%72\%69\%70\%74
+  - ((\%3C)|<)[^\n]+((\%3E)|>)
+  - <svg
+  - \%3Csvg
+  - \%C0\%BC
+  - \%E0\%80\%BC
 
 postFilter:
   -
-    name: taco
-    description: "Match taco."
-    match: 'taco'
+    name: javascript
+    description: "Match javascript."
+    match: 'javascript'
     template: '{{ .Match | shuffle }}'
   -
-    name: goodtimes
-    description: "Match good times."
-    match: 'good.+times'
-    template: '{{ .Match | upper | nospace }}'
+    name: script
+    description: "script tags"
+    match: '\<script.*\>'
+    template: '{{ .Match | shuffle}}'
+  -
+    name: scriptenc
+    description: "encoded script tags"
+    match: '\%3cscript.*\%3e'
+    template: '{{ .Match | shuffle }}'
