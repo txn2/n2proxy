@@ -97,8 +97,6 @@ func (e *Eng) ProcessRequest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// /approval/email_video.html?clip_id=1&subject=jrigt%22%3e%3cimg%20src%3da%20onerror%3dalert(1)%3ed4xd6
-
 	// search for posted contraband
 	for _, rgx := range e.postBan {
 		if rgx.Match(bytes.ToLower(b)) {
