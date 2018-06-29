@@ -59,6 +59,12 @@ func (e *Eng) ProcessRequest(w http.ResponseWriter, r *http.Request) {
 		buri := bytes.ToLower([]byte(r.RequestURI))
 		if rgx.Match(buri) {
 			e.logger.Warn("Bypassing: Whitelisted URL found.", zap.String("Regexp", rgx.String()), zap.ByteString("URI", buri))
+			body := ioutil.NopCloser(bytes.NewReader(b))
+
+			r.Body = body
+			r.ContentLength = int64(len(b))
+			r.Header.Set("Content-Length", strconv.Itoa(len(b)))
+
 			return
 		}
 	}
