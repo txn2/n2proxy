@@ -30,20 +30,22 @@ type FilterTemplate struct {
 
 // EngCfg defines an engine configuration
 type EngCfg struct {
-	PostBan  []string    `yaml:"postBan"`
-	UrlBan   []string    `yaml:"urlBan"`
-	QueryBan []string    `yaml:"queryBan"`
-	Filter   []FilterCfg `yaml:"postFilter"`
+	UrlWhiteList []string    `yaml:"urlWhiteList"`
+	PostBan      []string    `yaml:"postBan"`
+	UrlBan       []string    `yaml:"urlBan"`
+	QueryBan     []string    `yaml:"queryBan"`
+	Filter       []FilterCfg `yaml:"postFilter"`
 }
 
 // Eng http.Request rule engine.
 type Eng struct {
-	cfg      EngCfg
-	postBan  []*regexp.Regexp
-	urlBan   []*regexp.Regexp
-	queryBan []*regexp.Regexp
-	filter   map[*regexp.Regexp]FilterTemplate
-	logger   *zap.Logger
+	cfg          EngCfg
+	urlWhiteList []*regexp.Regexp
+	postBan      []*regexp.Regexp
+	urlBan       []*regexp.Regexp
+	queryBan     []*regexp.Regexp
+	filter       map[*regexp.Regexp]FilterTemplate
+	logger       *zap.Logger
 }
 
 // ProcessRequest performs any rules on matching requests
@@ -51,6 +53,15 @@ func (e *Eng) ProcessRequest(w http.ResponseWriter, r *http.Request) {
 
 	b, _ := ioutil.ReadAll(r.Body)
 	r.Body.Close()
+
+	// bypass on urlWhitelist
+	for _, rgx := range e.urlWhiteList {
+		buri := bytes.ToLower([]byte(r.RequestURI))
+		if rgx.Match(buri) {
+			e.logger.Warn("Bypassing: Whitelisted URL found.", zap.String("Regexp", rgx.String()), zap.ByteString("URI", buri))
+			return
+		}
+	}
 
 	// run filter if there is a body
 	if len(b) > 0 {
@@ -114,6 +125,21 @@ func (e *Eng) ProcessRequest(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// regexpCompile
+func regexpCompile(rrxp []string) ([]*regexp.Regexp, error) {
+	crxp := make([]*regexp.Regexp, 0)
+
+	for _, r := range rrxp {
+		rxp, err := regexp.Compile("(?i)" + strings.ToLower(r))
+		if err != nil {
+			return crxp, err
+		}
+		crxp = append(crxp, rxp)
+	}
+
+	return crxp, nil
+}
+
 // NewEngFromYml loads an engine from yaml data
 func NewEngFromYml(filename string, logger *zap.Logger) (*Eng, error) {
 
@@ -129,37 +155,28 @@ func NewEngFromYml(filename string, logger *zap.Logger) (*Eng, error) {
 		return nil, err
 	}
 
-	postBan := make([]*regexp.Regexp, 0)
-
-	for _, r := range engCfg.PostBan {
-		rxp, err := regexp.Compile("(?i)" + strings.ToLower(r))
-		if err != nil {
-			logger.Error("Error in regex compile: " + err.Error())
-			os.Exit(1)
-		}
-		postBan = append(postBan, rxp)
+	urlWhileList, err := regexpCompile(engCfg.UrlWhiteList)
+	if err != nil {
+		logger.Error("Error in urlWhileList regex compile: " + err.Error())
+		os.Exit(1)
 	}
 
-	urlBan := make([]*regexp.Regexp, 0)
-
-	for _, r := range engCfg.UrlBan {
-		rxp, err := regexp.Compile("(?i)" + strings.ToLower(r))
-		if err != nil {
-			logger.Error("Error in regex compile: " + err.Error())
-			os.Exit(1)
-		}
-		urlBan = append(urlBan, rxp)
+	postBan, err := regexpCompile(engCfg.PostBan)
+	if err != nil {
+		logger.Error("Error in postBan regex compile: " + err.Error())
+		os.Exit(1)
 	}
 
-	queryBan := make([]*regexp.Regexp, 0)
+	urlBan, err := regexpCompile(engCfg.UrlBan)
+	if err != nil {
+		logger.Error("Error in urlBan regex compile: " + err.Error())
+		os.Exit(1)
+	}
 
-	for _, r := range engCfg.QueryBan {
-		rxp, err := regexp.Compile("(?i)" + strings.ToLower(r))
-		if err != nil {
-			logger.Error("Error in regex compile: " + err.Error())
-			os.Exit(1)
-		}
-		urlBan = append(queryBan, rxp)
+	queryBan, err := regexpCompile(engCfg.QueryBan)
+	if err != nil {
+		logger.Error("Error in queryBan regex compile: " + err.Error())
+		os.Exit(1)
 	}
 
 	filter := make(map[*regexp.Regexp]FilterTemplate, 0)
@@ -167,7 +184,7 @@ func NewEngFromYml(filename string, logger *zap.Logger) (*Eng, error) {
 	for _, filterCfg := range engCfg.Filter {
 		rxp, err := regexp.Compile(strings.ToLower(filterCfg.Match))
 		if err != nil {
-			logger.Error("Error in regex compile: " + err.Error())
+			logger.Error("Error in filterCfg regex compile: " + err.Error())
 			os.Exit(1)
 		}
 
@@ -183,11 +200,13 @@ func NewEngFromYml(filename string, logger *zap.Logger) (*Eng, error) {
 	}
 
 	eng := &Eng{
-		cfg:     engCfg,
-		postBan: postBan,
-		urlBan:  urlBan,
-		filter:  filter,
-		logger:  logger,
+		cfg:          engCfg,
+		urlWhiteList: urlWhileList,
+		postBan:      postBan,
+		urlBan:       urlBan,
+		queryBan:     queryBan,
+		filter:       filter,
+		logger:       logger,
 	}
 
 	return eng, nil

@@ -1,3 +1,5 @@
+urlWhiteList:
+  - ^/example/index
 postBan:
   - \w*((\%27)|(\'))((\%6F)|o|(\%4F))((\%72)|r|(\%52))
   - ((\%3D)|(=))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))
@@ -13,7 +15,6 @@ postBan:
   - \%3C\%73\%63\%72\%69\%70\%74
   - \%C0\%BC
   - \%E0\%80\%BC
-
 urlBan:
   - \w*((\%27)|(\'))((\%6F)|o|(\%4F))((\%72)|r|(\%52))
   - ((\%3D)|(=))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))
@@ -45,20 +46,16 @@ queryBan:
   - \%3Csvg
   - \%C0\%BC
   - \%E0\%80\%BC
-
 postFilter:
-  -
-    name: javascript
+  - name: javascript
     description: "Match javascript."
     match: 'javascript'
     template: '{{ .Match | shuffle }}'
-  -
-    name: script
+  - name: script
     description: "script tags"
     match: '\<script.*\>'
     template: '{{ .Match | shuffle}}'
-  -
-    name: scriptenc
+  - name: scriptenc
     description: "encoded script tags"
     match: '\%3cscript.*\%3e'
     template: '{{ .Match | shuffle }}'
