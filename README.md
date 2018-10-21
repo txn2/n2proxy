@@ -50,8 +50,10 @@ Generate a build without publishing it:
 goreleaser --skip-publish --rm-dist --skip-validate
 ```
 
-
-
+Generate Release:
+```bash
+GITHUB_TOKEN=$GITHUB_TOKEN goreleaser --rm-dist
+```
 
 [SQL injection]: https://www.owasp.org/index.php/SQL_Injection
 [xss]: https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)
