@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"crypto/tls"
+	"github.com/txn2/n2proxy/sec"
 
 	"github.com/txn2/n2proxy/rweng"
 	"go.uber.org/zap"
@@ -89,7 +90,8 @@ func (p *Proxy) handle(w http.ResponseWriter, r *http.Request) {
 // main function
 func main() {
 	portEnv := getEnv("PORT", "9090")
-	cfgEnv := getEnv("CFG", "./cfg.yml")
+	cfgFileEnv := getEnv("CFG", "./cfg.yml")
+	tlsCfgFileEnv := getEnv("TLSCFG", "")
 	backendEnv := getEnv("BACKEND", "http://example.com:80")
 	logoutEnv := getEnv("LOGOUT", "stdout")
 	tlsEnvBool := false
@@ -107,7 +109,8 @@ func main() {
 
 	// command line falls back to env
 	port := flag.String("port", portEnv, "port to listen on.")
-	cfg := flag.String("cfg", cfgEnv, "config file path.")
+	cfgFile := flag.String("cfg", cfgFileEnv, "config file path.")
+	tlsCfgFile := flag.String("tlsCfg", tlsCfgFileEnv, "tls config file path.")
 	backend := flag.String("backend", backendEnv, "backend server.")
 	logout := flag.String("logout", logoutEnv, "log output stdout | ")
 	srvtls := flag.Bool("tls", tlsEnvBool, "TLS Support (requires crt and key)")
@@ -133,27 +136,59 @@ func main() {
 		return
 	}
 
-	logger.Sync()
+	err = logger.Sync()
+	if err != nil {
+		fmt.Printf("Error synchronizing logger: %s\n", err.Error())
+		os.Exit(1)
+	}
 
 	logger.Info("Starting reverse proxy on port: " + *port)
 	logger.Info("Requests proxied to Backend: " + *backend)
 
 	// proxy
-	proxy := NewProxy(*backend, *skpver, *cfg, logger)
+	proxy := NewProxy(*backend, *skpver, *cfgFile, logger)
+
+	mux := http.NewServeMux()
 
 	// server
-	http.HandleFunc("/", proxy.handle)
+	mux.HandleFunc("/", proxy.handle)
 
+	srv := &http.Server{
+		Addr:    ":" + *port,
+		Handler: mux,
+	}
+
+	// If TLS is not specified serve the content unencrypted.
 	if *srvtls != true {
-		err = http.ListenAndServe(":"+*port, nil)
+		err = srv.ListenAndServe()
 		if err != nil {
 			fmt.Printf("Error starting proxy: %s\n", err.Error())
 		}
 		os.Exit(0)
 	}
 
+	// Get a generic TLS configuration
+	tlsCfg := sec.GenericTLSConfig()
+
+	if *tlsCfgFile == "" {
+		logger.Warn("No TLS configuration specified, using default.")
+	}
+
+	if *tlsCfgFile != "" {
+		logger.Info("Loading TLS configuration from " + *tlsCfgFile)
+		tlsCfg, err = sec.NewTLSCfgFromYaml(*tlsCfgFile, logger)
+		if err != nil {
+			fmt.Printf("Error configuring TLS: %s\n", err.Error())
+			os.Exit(0)
+		}
+	}
+
 	logger.Info("Starting proxy in TLS mode.")
-	err = http.ListenAndServeTLS(":"+*port, *crt, *key, nil)
+
+	srv.TLSConfig = tlsCfg
+	srv.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0)
+
+	err = srv.ListenAndServeTLS(*crt, *key)
 	if err != nil {
 		fmt.Printf("Error starting proxyin TLS mode: %s\n", err.Error())
 	}

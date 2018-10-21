@@ -41,7 +41,20 @@ docker run --rm -t -v "$(pwd)":/cfg/ -p 9092:9092 \
 
 Browse to http://localhost:9090
 
+### Development Notes
+
+This project uses [Go Releaser].
+
+Generate a build without publishing it:
+```bash
+goreleaser --skip-publish --rm-dist --skip-validate
+```
+
+
+
+
 [SQL injection]: https://www.owasp.org/index.php/SQL_Injection
 [xss]: https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)
 [n2proxy]: https://github.com/txn2/n2proxy
 [reverse proxy]: https://en.wikipedia.org/wiki/Reverse_proxy
+[Go Releaser]: https://goreleaser.com/
